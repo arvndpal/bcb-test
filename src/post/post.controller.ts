@@ -13,6 +13,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { Post as PostInterface } from './interfaces/post.interface';
+import { CreatePostDto } from './dto/create-post.dto';
+import { UpdatePostDto } from './dto/update-post.dto';
+import { PostExistsPipe } from './pipes/post-exists.pipe';
 
 @Controller('post')
 export class PostController {
@@ -33,15 +36,15 @@ export class PostController {
   }
 
   @Get(':id')
-  getPostById(@Param('id', ParseIntPipe) id: number): PostInterface {
+  getPostById(
+    @Param('id', ParseIntPipe, PostExistsPipe) id: number,
+  ): PostInterface {
     return this.postService.getPostById(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  createPost(
-    @Body() createPostData: Omit<PostInterface, 'id' | 'createdAt'>,
-  ): PostInterface {
+  createPost(@Body() createPostData: CreatePostDto): PostInterface {
     console.log('createPostData', createPostData);
     return this.postService.createPost(createPostData);
   }
@@ -50,7 +53,7 @@ export class PostController {
   @HttpCode(HttpStatus.OK)
   updatePost(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateData: Partial<PostInterface>,
+    @Body() updateData: UpdatePostDto,
   ): PostInterface {
     return this.postService.updatePost(id, updateData);
   }
